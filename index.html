@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>創作者序號兌換</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6efe6;--bg-2:#efe4d4;--paper:#fffdf9;--ink:#3d352c;--ink-soft:#8a7d6c;
+    --line:#e7dccb;--accent:#b5704e;--accent-soft:#e8cdbb;--accent-ink:#8a4f31;--gold:#c3a05a;
+    --done-bg:#eef3e8;--done-line:#cfe0bd;--done-ink:#5a7a3e;--danger:#b2524a;
+    --shadow:0 1px 2px rgba(80,60,40,.05),0 10px 30px rgba(110,84,55,.09);
+    --shadow-sm:0 1px 2px rgba(80,60,40,.06),0 4px 12px rgba(110,84,55,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 600px at 15% -10%, #fbf4ea 0%, rgba(251,244,234,0) 60%),radial-gradient(1000px 500px at 95% 0%, #f3e7d6 0%, rgba(243,231,214,0) 55%),linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%);
+    background-attachment:fixed;line-height:1.6;-webkit-font-smoothing:antialiased;padding:28px 18px 110px;}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  header{text-align:center;padding:14px 0 26px}
+  .kicker{font-size:12px;letter-spacing:.32em;color:var(--accent-ink);text-transform:uppercase;font-weight:700;opacity:.8}
+  h1{font-family:"Noto Serif TC",serif;font-weight:700;font-size:clamp(26px,4.2vw,40px);letter-spacing:.02em;margin:8px 0 6px;color:var(--ink)}
+  .sub{color:var(--ink-soft);font-size:14.5px}
+  .divider{width:54px;height:3px;border-radius:3px;margin:16px auto 0;background:linear-gradient(90deg,var(--gold),var(--accent))}
+
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:18px}
+  .panel-title{font-family:"Noto Serif TC",serif;font-size:16px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:14px;color:var(--ink)}
+  .panel-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+  .accts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .acct{display:inline-flex;align-items:center;gap:9px;padding:9px 15px;border-radius:999px;cursor:pointer;background:#fbf5ec;border:1.5px solid var(--line);font-weight:500;font-size:14.5px;color:var(--ink);transition:.18s;user-select:none}
+  .acct:hover{border-color:var(--accent-soft);transform:translateY(-1px)}
+  .acct.active{background:linear-gradient(180deg,#fff,#fdf3e9);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgba(181,112,78,.18)}
+  .acct .badge{font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:1px 8px;min-width:20px;text-align:center}
+  .acct.active .badge{background:var(--accent-ink)}
+  .acct .ava{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--gold),var(--accent))}
+  .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:999px;cursor:pointer;background:transparent;border:1.5px dashed var(--accent-soft);color:var(--accent-ink);font-weight:600;font-size:14px;font-family:inherit;transition:.18s}
+  .btn-ghost:hover{background:#fbf1e7;border-style:solid}
+
+  .summary{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+  .summary .who{display:flex;align-items:center;gap:12px;min-width:200px}
+  .summary .who .ava{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--gold),var(--accent));box-shadow:0 4px 12px rgba(181,112,78,.25)}
+  .summary .who .nm{font-family:"Noto Serif TC",serif;font-weight:600;font-size:18px}
+  .summary .who .st{font-size:12.5px;color:var(--ink-soft)}
+  .progress{flex:1;min-width:220px}
+  .progress .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .progress .label{font-size:13px;color:var(--ink-soft)}
+  .progress .count{font-family:"Noto Serif TC",serif;font-weight:700;font-size:15px;color:var(--accent-ink)}
+  .bar{height:11px;border-radius:999px;background:#efe3d2;overflow:hidden;box-shadow:inset 0 1px 2px rgba(120,90,60,.12)}
+  .bar>i{display:block;height:100%;width:0;border-radius:999px;transition:width .5s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,var(--gold),var(--accent))}
+  .acct-tools{display:flex;gap:8px}
+  .icon-btn{width:38px;height:38px;border-radius:12px;cursor:pointer;border:1.5px solid var(--line);background:#fbf5ec;color:var(--ink-soft);font-size:16px;transition:.18s;display:grid;place-items:center}
+  .icon-btn:hover{border-color:var(--accent-soft);color:var(--accent-ink);background:#fff}
+
+  .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .search{position:relative;flex:1;min-width:200px}
+  .search input{width:100%;padding:12px 16px 12px 40px;border-radius:14px;border:1.5px solid var(--line);background:var(--paper);font-family:inherit;font-size:14.5px;color:var(--ink);box-shadow:var(--shadow-sm)}
+  .search input:focus{outline:none;border-color:var(--accent)}
+  .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.45}
+  .segmented{display:inline-flex;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:4px;box-shadow:var(--shadow-sm)}
+  .segmented button{border:none;background:transparent;padding:8px 15px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);transition:.15s}
+  .segmented button.on{background:linear-gradient(180deg,#fff,#fdf3e9);color:var(--accent-ink);box-shadow:var(--shadow-sm)}
+  .btn-line{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;border-radius:14px;cursor:pointer;border:1.5px solid var(--line);background:var(--paper);font-family:inherit;font-weight:700;font-size:14px;color:var(--accent-ink);box-shadow:var(--shadow-sm);transition:.18s}
+  .btn-line:hover{transform:translateY(-1px);border-color:var(--accent-soft)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;box-shadow:var(--shadow-sm);transition:.2s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .card.done{background:var(--done-bg);border-color:var(--done-line)}
+  .card.picked{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft),var(--shadow)}
+  .card .corner{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 42px 42px 0;border-color:transparent var(--done-line) transparent transparent;opacity:0;transition:.2s}
+  .card.done .corner{opacity:1}
+  .card .corner-check{position:absolute;top:5px;right:7px;color:#fff;font-size:12px;opacity:0;transition:.2s}
+  .card.done .corner-check{opacity:1}
+  .card-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .pick{width:24px;height:24px;flex-shrink:0;border-radius:8px;border:2px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;transition:.15s;color:transparent}
+  .pick:hover{border-color:var(--accent-soft)}
+  .pick.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .pick:disabled{opacity:.35;cursor:not-allowed}
+  .card-head .name{font-family:"Noto Serif TC",serif;font-weight:600;font-size:17px;line-height:1.25;min-width:0}
+
+  .code{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:14px;font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.06em;font-weight:600;color:var(--accent-ink);background:#fbf3e9;border:1px dashed var(--accent-soft);border-radius:10px;padding:10px 13px;cursor:pointer;transition:.15s;text-align:left}
+  .code:hover{background:#f7ead9;border-color:var(--accent)}
+  .code:active{transform:scale(.99)}
+  .code .txt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .code .ci{opacity:.5;flex-shrink:0;transition:.15s}
+  .code:hover .ci{opacity:.9}
+  .card.done .code{background:#f1f6ea;border-color:var(--done-line);color:var(--done-ink)}
+  .code.empty{cursor:default;color:var(--ink-soft);font-style:italic;letter-spacing:0;font-family:"Noto Sans TC";border-style:solid;border-color:var(--line);background:#f7f1e8}
+  .code.empty:hover{background:#f7f1e8;border-color:var(--line)}
+
+  .toggle{width:100%;padding:10px;border-radius:11px;cursor:pointer;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-weight:700;font-size:14px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;gap:7px;transition:.18s}
+  .toggle:hover{border-color:var(--accent-soft)}
+  .toggle.on{background:linear-gradient(180deg,#f3f8ec,#e8f1dc);border-color:var(--done-line);color:var(--done-ink)}
+  .toggle:disabled{opacity:.45;cursor:not-allowed}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft)}
+  .empty-state .big{font-size:40px;margin-bottom:10px;opacity:.5}
+  .foot-note{width:100%;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:22px;line-height:1.7}
+
+  .selbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;padding:12px 14px 12px 20px;border-radius:999px;box-shadow:0 14px 40px rgba(60,40,20,.3);opacity:0;pointer-events:none;transition:.28s cubic-bezier(.22,1,.36,1);z-index:55}
+  .selbar.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+  .selbar .n{font-weight:500;font-size:14.5px;white-space:nowrap}
+  .selbar .n b{font-family:"Noto Serif TC",serif;color:var(--gold)}
+  .selbar .sb{border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:9px 16px;transition:.15s;white-space:nowrap}
+  .selbar .sb.copy{background:linear-gradient(180deg,#c88a5f,var(--accent));color:#fff}
+  .selbar .sb.copy:hover{filter:brightness(1.07)}
+  .selbar .sb.clear{background:rgba(255,255,255,.14);color:#fff}
+  .selbar .sb.clear:hover{background:rgba(255,255,255,.24)}
+
+  .overlay{position:fixed;inset:0;background:rgba(61,53,44,.4);backdrop-filter:blur(3px);display:none;place-items:center;z-index:60;padding:20px}
+  .overlay.show{display:grid}
+  .modal{background:var(--paper);border-radius:22px;box-shadow:0 30px 80px rgba(60,40,20,.3);width:100%;max-width:460px;padding:26px;animation:pop .25s cubic-bezier(.22,1,.36,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+  .modal h3{font-family:"Noto Serif TC",serif;font-size:20px;margin-bottom:4px}
+  .modal p.hint{color:var(--ink-soft);font-size:13px;margin-bottom:18px}
+  .mg-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+  .field input{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid var(--line);font-family:inherit;font-size:15px;color:var(--ink);background:#fffdfa}
+  .field input:focus{outline:none;border-color:var(--accent)}
+  .allbox{width:100%;height:300px;resize:vertical;padding:14px 16px;border-radius:14px;border:1.5px solid var(--accent-soft);background:#fbf3e9;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15.5px;letter-spacing:.06em;color:var(--accent-ink);line-height:2;white-space:pre}
+  .allbox:focus{outline:none;border-color:var(--accent)}
+  .btn-solid{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border-radius:14px;cursor:pointer;border:none;font-family:inherit;font-weight:700;font-size:14px;color:#fff;background:linear-gradient(180deg,#c17c57,var(--accent));box-shadow:0 6px 16px rgba(181,112,78,.28);transition:.18s}
+  .btn-solid:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(181,112,78,.34)}
+  .modal.wide{max-width:600px}
+  .mg-list{max-height:48vh;overflow-y:auto;margin:0 -4px;padding:2px 4px}
+  .mg-row{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+  .mg-row .idx{width:24px;text-align:right;color:var(--ink-soft);font-size:12.5px;flex-shrink:0;font-variant-numeric:tabular-nums}
+  .mg-row input{padding:9px 11px;border-radius:10px;border:1.5px solid var(--line);font-family:inherit;font-size:14px;color:var(--ink);background:#fffdfa;min-width:0}
+  .mg-row input:focus{outline:none;border-color:var(--accent)}
+  .mg-row .mg-name{flex:1.3}
+  .mg-row .mg-code{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}
+  .mg-row .mg-rm{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .mg-row .mg-rm:hover{color:var(--danger);border-color:#eccfca;background:#fcf4f2}
+  .mg-add{width:100%;margin-top:4px;padding:11px;border-radius:12px;border:1.5px dashed var(--accent-soft);background:transparent;color:var(--accent-ink);font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:.15s}
+  .mg-add:hover{background:#fbf1e7;border-style:solid}
+  .mg-tip{font-size:12px;color:var(--ink-soft);line-height:1.6;margin:10px 2px 0}
+  .modal-actions{display:flex;gap:10px;margin-top:22px}
+  .modal-actions button{flex:1;padding:12px;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:700;font-size:14.5px;border:none;transition:.15s}
+  .btn-cancel{background:#f1e8da;color:var(--ink-soft)}
+  .btn-cancel:hover{background:#e9ddca}
+  .btn-ok{background:linear-gradient(180deg,#c17c57,var(--accent));color:#fff}
+  .btn-ok:hover{filter:brightness(1.04)}
+
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.3s;z-index:70;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:560px){body{padding:20px 12px 110px}.panel{padding:18px 16px}.summary{gap:16px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Serial Code</div>
+    <h1>創作者序號兌換</h1>
+    <p class="sub">管理多個帳號,個別記錄每組序號是否已兌換</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="panel">
+    <div class="panel-title"><span class="dot"></span>我的帳號</div>
+    <div class="accts" id="accts"></div>
+    <div class="summary" id="summary" style="display:none">
+      <div class="who">
+        <div class="ava" id="sumAva">?</div>
+        <div><div class="nm" id="sumName">—</div><div class="st">目前檢視中的帳號</div></div>
+      </div>
+      <div class="progress">
+        <div class="top"><span class="label">兌換進度</span><span class="count" id="sumCount">0 / 0</span></div>
+        <div class="bar"><i id="sumBar"></i></div>
+      </div>
+      <div class="acct-tools">
+        <button class="icon-btn" id="renameBtn" title="重新命名帳號">✎</button>
+        <button class="icon-btn" id="delAcctBtn" title="刪除帳號">🗑</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+      <input id="search" placeholder="搜尋創作者或序號…">
+    </div>
+    <div class="segmented" id="filters">
+      <button data-f="all" class="on">全部</button>
+      <button data-f="todo">未兌換</button>
+      <button data-f="done">已兌換</button>
+    </div>
+    <button class="btn-line" id="allBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      全部序號
+    </button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="foot-note">換裝置資料會消失唷 🥲</div>
+</div>
+
+<div class="selbar" id="selbar">
+  <span class="n">已選 <b id="selN">0</b> 組序號</span>
+  <button class="sb copy" id="selCopy">複製序號</button>
+  <button class="sb clear" id="selClear">清除</button>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const LS_KEY = "serialTracker.v1";
+
+  // ===== 序號清單(直接寫在這裡)=====
+  // 一行一位:"名字=序號",序號未公佈就只寫名字。要增減直接改這個陣列。
+  const LIST = [
+    "Rui=RUIART","里歐=Leocyg","皮皮=17baby","小亮=XLIANG","獅子丸=SHISHI","小夜夜=yeyart",
+    "艾希=ELSMAP","瓜肉=GUAROU","小君=XJUN24","初吻=ARKISS","基德薯叔=unkidd","肯倫=kinlun",
+    "八毛=bamao8","光光實驗室=GUALAB","小六=MABUS6","阿嚕嚕=ARURU8","菇喜=GOODC8","魚丸=Yuwan8",
+    "小貓奈奈=NEKONA","二犬=Twodog","金金=Jinjin","鈴姆=Lingmu","傑克雪諾=JKSNOW","卡祖笛=TKAZOO",
+    "咪咪蛋=mmdart","taxicute=taxi88","可比_=kebi88","路過大學生=Passby","馬克巴巴=MKBABA",
+    "薯餅姐姐=HBROWN","阿偉-Wei=awei24","短腿娜娜=nana24","ivanl艾文=ivan24",
+    "愛文=PLYWEN","兔森森=BUNSEN"
+  ];
+
+  function parseRaw(raw){
+    return String(raw||"").split(/\r?\n/).map(s=>s.trim())
+      .filter(s=>s && !s.startsWith("//"))
+      .map(s=>{const i=s.indexOf("=");return i<0?{name:s,code:""}:{name:s.slice(0,i).trim(),code:s.slice(i+1).trim()};})
+      .filter(c=>c.name);
+  }
+  const SOURCE = parseRaw(LIST.join("\n"));
+  // 以「名字」作為穩定識別,序號改了、兌換紀錄照樣對得上
+  function buildCreators(){return SOURCE.map(c=>({id:c.name,name:c.name,code:c.code}));}
+
+  const selected = new Set();
+  let filter = "all", query = "";
+  let state = load();
+
+
+  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+
+  // 舊版資料(creators 帶隨機 id、redeemed 以 id 為鍵)→ 轉成以名字為鍵
+  function migrate(o){
+    if(Array.isArray(o.creators) && o.creators.length && o.creators[0] && o.creators[0].id){
+      const id2name={};o.creators.forEach(c=>{if(c&&c.id)id2name[c.id]=c.name;});
+      const r=o.redeemed||{};
+      Object.keys(r).forEach(acct=>{
+        const m=r[acct]||{},nm={};
+        Object.keys(m).forEach(k=>{if(m[k]){const name=id2name[k]||k;nm[name]=true;}});
+        r[acct]=nm;
+      });
+    }
+    delete o.creators;
+  }
+
+  function load(){
+    const s={accounts:[],activeId:null,redeemed:{}};
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if(raw){
+        const o=JSON.parse(raw)||{};
+        migrate(o);
+        s.accounts=Array.isArray(o.accounts)?o.accounts:[];
+        s.activeId=o.activeId||null;
+        s.redeemed=o.redeemed&&typeof o.redeemed==="object"?o.redeemed:{};
+      }
+    }catch(e){}
+    s.creators=buildCreators();   // 清單一律以檔案為準
+    if(!s.accounts.find(a=>a.id===s.activeId)) s.activeId=s.accounts[0]?.id||null;
+    return s;
+  }
+  function save(){
+    try{localStorage.setItem(LS_KEY,JSON.stringify({accounts:state.accounts,activeId:state.activeId,redeemed:state.redeemed}));}
+    catch(e){toast("儲存失敗,瀏覽器空間可能已滿");}
+  }
+
+  function initials(name){if(!name)return"?";const n=name.trim();return /[一-鿿]/.test(n)?n.slice(-1):n.slice(0,2).toUpperCase();}
+  function activeAccount(){return state.accounts.find(a=>a.id===state.activeId)||null;}
+  function redeemedMap(){if(!state.activeId)return{};state.redeemed[state.activeId]=state.redeemed[state.activeId]||{};return state.redeemed[state.activeId];}
+  function doneCount(acctId){const m=state.redeemed[acctId]||{};return state.creators.filter(c=>m[c.id]).length;}
+  function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  function render(){renderAccounts();renderSummary();renderGrid();renderSelbar();save();}
+
+  function renderAccounts(){
+    const el=document.getElementById("accts");el.innerHTML="";
+    state.accounts.forEach(a=>{
+      const pill=document.createElement("div");
+      pill.className="acct"+(a.id===state.activeId?" active":"");
+      pill.innerHTML=`<span class="ava">${esc(initials(a.name))}</span>${esc(a.name)} <span class="badge">${doneCount(a.id)}</span>`;
+      pill.onclick=()=>{state.activeId=a.id;render();};
+      el.appendChild(pill);
+    });
+    const add=document.createElement("button");
+    add.className="btn-ghost";
+    add.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> 新增帳號`;
+    add.onclick=openAddAccount;el.appendChild(add);
+  }
+  function renderSummary(){
+    const box=document.getElementById("summary");const acc=activeAccount();
+    if(!acc){box.style.display="none";return;}
+    box.style.display="flex";
+    document.getElementById("sumAva").textContent=initials(acc.name);
+    document.getElementById("sumName").textContent=acc.name;
+    const total=state.creators.length,done=doneCount(acc.id);
+    document.getElementById("sumCount").textContent=`${done} / ${total}`;
+    document.getElementById("sumBar").style.width=(total?Math.round(done/total*100):0)+"%";
+  }
+  function renderGrid(){
+    const grid=document.getElementById("grid");grid.innerHTML="";const acc=activeAccount();
+    if(!acc){
+      grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="big">👤</div><div style="font-family:'Noto Serif TC';font-size:18px;color:var(--ink);margin-bottom:6px">先新增一個帳號</div><div>點上方「新增帳號」,就能開始記錄這個帳號兌換過哪些序號。</div></div>`;
+      return;
+    }
+    const map=redeemedMap();const q=query.trim().toLowerCase();
+    const list=state.creators.filter(c=>{
+      const isDone=!!map[c.id];
+      if(filter==="done"&&!isDone)return false;
+      if(filter==="todo"&&isDone)return false;
+      if(q&&!(c.name.toLowerCase().includes(q)||(c.code||"").toLowerCase().includes(q)))return false;
+      return true;
+    });
+    if(list.length===0){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="big">🔍</div><div>沒有符合條件的序號。</div></div>`;return;}
+    list.forEach(c=>{
+      const isDone=!!map[c.id];const hasCode=!!(c.code&&c.code.trim());const isPicked=selected.has(c.id);
+      const card=document.createElement("div");
+      card.className="card"+(isDone?" done":"")+(isPicked?" picked":"");
+      card.innerHTML=`
+        <div class="corner"></div><div class="corner-check">✓</div>
+        <div class="card-head">
+          <button class="pick ${isPicked?"on":""}" ${hasCode?"":"disabled"} title="勾選以批次複製">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+          <div class="name">${esc(c.name)}</div>
+        </div>
+        <button class="code ${hasCode?"":"empty"}" title="${hasCode?"點擊複製序號":""}">
+          <span class="txt">${hasCode?esc(c.code):"序號尚未公佈"}</span>
+          ${hasCode?`<svg class="ci" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`:""}
+        </button>
+        <button class="toggle ${isDone?"on":""}" ${hasCode?"":"disabled"}>
+          ${isDone?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 已兌換`:(hasCode?"標記為已兌換":"等待序號公佈")}
+        </button>`;
+      const codeBtn=card.querySelector(".code");
+      if(hasCode) codeBtn.onclick=()=>copy(c.code,"已複製序號:"+c.code);
+      const pick=card.querySelector(".pick");
+      if(hasCode) pick.onclick=()=>{if(selected.has(c.id))selected.delete(c.id);else selected.add(c.id);render();};
+      const tg=card.querySelector(".toggle");
+      if(hasCode) tg.onclick=()=>{if(map[c.id])delete map[c.id];else map[c.id]=true;render();};
+      grid.appendChild(card);
+    });
+  }
+  function renderSelbar(){
+    [...selected].forEach(id=>{if(!state.creators.find(c=>c.id===id))selected.delete(id);});
+    document.getElementById("selN").textContent=selected.size;
+    document.getElementById("selbar").classList.toggle("show",selected.size>0);
+  }
+
+  function copy(text,msg){
+    const done=()=>toast(msg||"已複製");
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+    else fallbackCopy(text,done);
+  }
+  function fallbackCopy(text,cb){
+    const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand("copy");cb();}catch(e){toast("複製失敗");}
+    document.body.removeChild(ta);
+  }
+
+  let toastTimer;
+  function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2000);}
+
+  const overlay=document.getElementById("overlay"),modal=document.getElementById("modal");
+  function closeModal(){overlay.classList.remove("show");modal.className="modal";modal.innerHTML="";}
+  /* 點彈窗外的區域不會關閉,避免選字時誤觸 */
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+  function openAddAccount(){
+    modal.innerHTML=`<h3>新增帳號</h3><p class="hint">幫這個遊戲帳號取個名字,方便辨識。</p>
+      <div class="field"><label>帳號名稱</label><input id="mInput" placeholder="例如:主帳、小帳1、實況帳…" maxlength="24"></div>
+      <div class="modal-actions"><button class="btn-cancel" id="mCancel">取消</button><button class="btn-ok" id="mOk">新增</button></div>`;
+    overlay.classList.add("show");const inp=document.getElementById("mInput");inp.focus();
+    document.getElementById("mCancel").onclick=closeModal;
+    const ok=()=>{const v=inp.value.trim();if(!v){inp.focus();return;}const a={id:uid(),name:v};state.accounts.push(a);state.activeId=a.id;state.redeemed[a.id]={};closeModal();render();toast("已新增帳號:"+v);};
+    document.getElementById("mOk").onclick=ok;inp.onkeydown=e=>{if(e.key==="Enter")ok();};
+  }
+  function openRenameAccount(){
+    const acc=activeAccount();if(!acc)return;
+    modal.innerHTML=`<h3>重新命名帳號</h3><p class="hint">修改目前帳號的顯示名稱。</p>
+      <div class="field"><label>帳號名稱</label><input id="mInput" maxlength="24"></div>
+      <div class="modal-actions"><button class="btn-cancel" id="mCancel">取消</button><button class="btn-ok" id="mOk">儲存</button></div>`;
+    overlay.classList.add("show");const inp=document.getElementById("mInput");inp.value=acc.name;inp.focus();inp.select();
+    document.getElementById("mCancel").onclick=closeModal;
+    const ok=()=>{const v=inp.value.trim();if(!v){inp.focus();return;}acc.name=v;closeModal();render();toast("已更新名稱");};
+    document.getElementById("mOk").onclick=ok;inp.onkeydown=e=>{if(e.key==="Enter")ok();};
+  }
+  function openDeleteAccount(){
+    const acc=activeAccount();if(!acc)return;
+    modal.innerHTML=`<h3>刪除帳號</h3><p class="hint">確定要刪除「${esc(acc.name)}」嗎?這個帳號的兌換紀錄會一併移除,無法復原。</p>
+      <div class="modal-actions"><button class="btn-cancel" id="mCancel">取消</button><button class="btn-ok" id="mDel" style="background:linear-gradient(180deg,#c06258,var(--danger))">刪除</button></div>`;
+    overlay.classList.add("show");
+    document.getElementById("mCancel").onclick=closeModal;
+    document.getElementById("mDel").onclick=()=>{delete state.redeemed[acc.id];state.accounts=state.accounts.filter(a=>a.id!==acc.id);state.activeId=state.accounts.length?state.accounts[0].id:null;closeModal();render();toast("已刪除帳號");};
+  }
+
+  function openAllCodes(){
+    const codes=state.creators.filter(c=>c.code&&c.code.trim()).map(c=>c.code.trim());
+    const text=codes.join("\n");
+    modal.innerHTML=`
+      <div class="mg-head"><h3>全部序號</h3><span class="hint" style="margin:0">共 ${codes.length} 組</span></div>
+      <p class="hint" style="margin-top:-6px">一行一組,只有序號。可直接全選複製,或按下方按鈕一次複製全部。</p>
+      <textarea class="allbox" id="allBox" readonly>${esc(text)}</textarea>
+      <div class="modal-actions"><button class="btn-cancel" id="mCancel">關閉</button><button class="btn-ok" id="mOk">複製全部</button></div>`;
+    overlay.classList.add("show");
+    const box=document.getElementById("allBox");setTimeout(()=>{box.focus();box.select();},30);
+    document.getElementById("mCancel").onclick=closeModal;
+    document.getElementById("mOk").onclick=()=>{if(!codes.length){toast("目前沒有可複製的序號");return;}copy(text,`已複製全部 ${codes.length} 組序號`);};
+  }
+
+  document.getElementById("renameBtn").onclick=openRenameAccount;
+  document.getElementById("delAcctBtn").onclick=openDeleteAccount;
+  document.getElementById("allBtn").onclick=openAllCodes;
+  document.getElementById("search").oninput=e=>{query=e.target.value;renderGrid();};
+  document.getElementById("filters").onclick=e=>{const b=e.target.closest("button");if(!b)return;filter=b.dataset.f;[...document.querySelectorAll("#filters button")].forEach(x=>x.classList.toggle("on",x===b));renderGrid();};
+  document.getElementById("selClear").onclick=()=>{selected.clear();render();};
+  document.getElementById("selCopy").onclick=()=>{
+    const codes=state.creators.filter(c=>selected.has(c.id)&&c.code&&c.code.trim()).map(c=>c.code.trim());
+    if(!codes.length){toast("沒有可複製的序號");return;}
+    copy(codes.join("\n"),`已複製 ${codes.length} 組序號`);
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>
