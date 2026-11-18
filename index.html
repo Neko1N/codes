@@ -101,7 +101,10 @@
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft)}
   .empty-state .big{font-size:40px;margin-bottom:10px;opacity:.5}
-  .foot-note{width:100%;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:22px;line-height:1.7}
+  .foot-note{width:100%;text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:22px;line-height:1.9}
+  .notice{grid-column:1/-1;background:#fbf1e6;border:1px solid var(--accent-soft);color:var(--accent-ink);border-radius:14px;padding:12px 16px;font-size:13.5px;text-align:center}
+  .flink{color:var(--accent-ink);cursor:pointer;text-decoration:underline;font-weight:600;white-space:nowrap}
+  .flink:hover{color:var(--accent)}
 
   .selbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;padding:12px 14px 12px 20px;border-radius:999px;box-shadow:0 14px 40px rgba(60,40,20,.3);opacity:0;pointer-events:none;transition:.28s cubic-bezier(.22,1,.36,1);z-index:55}
   .selbar.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
@@ -200,7 +203,8 @@
 
   <div class="grid" id="grid"></div>
 
-  <div class="foot-note">換裝置資料會消失唷 🥲</div>
+  <div class="foot-note">換裝置資料會消失唷 🥲 &nbsp;·&nbsp; <span class="flink" id="exportBtn">匯出備份</span> &nbsp;·&nbsp; <span class="flink" id="importBtn">還原備份</span></div>
+  <input type="file" id="importFile" accept="application/json" hidden>
 </div>
 
 <div class="selbar" id="selbar">
@@ -315,11 +319,7 @@
   }
   function renderGrid(){
     const grid=document.getElementById("grid");grid.innerHTML="";const acc=activeAccount();
-    if(!acc){
-      grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="big">👤</div><div style="font-family:'Noto Serif TC';font-size:18px;color:var(--ink);margin-bottom:6px">先新增一個帳號</div><div>點上方「新增帳號」,就能開始記錄這個帳號兌換過哪些序號。</div></div>`;
-      return;
-    }
-    const map=redeemedMap();const q=query.trim().toLowerCase();
+    const map=acc?redeemedMap():{};const q=query.trim().toLowerCase();
     const list=state.creators.filter(c=>{
       const isDone=!!map[c.id];
       if(filter==="done"&&!isDone)return false;
@@ -327,9 +327,15 @@
       if(q&&!(c.name.toLowerCase().includes(q)||(c.code||"").toLowerCase().includes(q)))return false;
       return true;
     });
-    if(list.length===0){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="big">🔍</div><div>沒有符合條件的序號。</div></div>`;return;}
+    if(!acc){
+      const nb=document.createElement("div");nb.className="notice";
+      nb.innerHTML=`先在上方<b>新增帳號</b>,就能勾選記錄這個帳號兌換了哪些序號。`;
+      grid.appendChild(nb);
+    }
+    if(list.length===0){const e=document.createElement("div");e.className="empty-state";e.style.gridColumn="1/-1";e.innerHTML=`<div class="big">🔍</div><div>沒有符合條件的序號。</div>`;grid.appendChild(e);return;}
     list.forEach(c=>{
-      const isDone=!!map[c.id];const hasCode=!!(c.code&&c.code.trim());const isPicked=selected.has(c.id);
+      const hasCode=!!(c.code&&c.code.trim());const isDone=!!acc&&!!map[c.id];const isPicked=selected.has(c.id);
+      const canMark=!!acc&&hasCode;
       const card=document.createElement("div");
       card.className="card"+(isDone?" done":"")+(isPicked?" picked":"");
       card.innerHTML=`
@@ -344,15 +350,15 @@
           <span class="txt">${hasCode?esc(c.code):"序號尚未公佈"}</span>
           ${hasCode?`<svg class="ci" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`:""}
         </button>
-        <button class="toggle ${isDone?"on":""}" ${hasCode?"":"disabled"}>
-          ${isDone?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 已兌換`:(hasCode?"標記為已兌換":"等待序號公佈")}
+        <button class="toggle ${isDone?"on":""}" ${canMark?"":"disabled"}>
+          ${isDone?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 已兌換`:(!acc?"新增帳號後可勾選":(hasCode?"標記為已兌換":"等待序號公佈"))}
         </button>`;
       const codeBtn=card.querySelector(".code");
       if(hasCode) codeBtn.onclick=()=>copy(c.code,"已複製序號:"+c.code);
       const pick=card.querySelector(".pick");
       if(hasCode) pick.onclick=()=>{if(selected.has(c.id))selected.delete(c.id);else selected.add(c.id);render();};
       const tg=card.querySelector(".toggle");
-      if(hasCode) tg.onclick=()=>{if(map[c.id])delete map[c.id];else map[c.id]=true;render();};
+      if(canMark) tg.onclick=()=>{if(map[c.id])delete map[c.id];else map[c.id]=true;render();};
       grid.appendChild(card);
     });
   }
@@ -410,6 +416,26 @@
     document.getElementById("mDel").onclick=()=>{delete state.redeemed[acc.id];state.accounts=state.accounts.filter(a=>a.id!==acc.id);state.activeId=state.accounts.length?state.accounts[0].id:null;closeModal();render();toast("已刪除帳號");};
   }
 
+  function exportData(){
+    const data={accounts:state.accounts,activeId:state.activeId,redeemed:state.redeemed};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);const a=document.createElement("a");
+    const d=new Date();const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+    a.href=url;a.download=`序號兌換備份_${stamp}.json`;a.click();URL.revokeObjectURL(url);toast("已匯出備份檔");
+  }
+  function importData(file){
+    const r=new FileReader();
+    r.onload=()=>{try{
+      const o=JSON.parse(r.result)||{};
+      migrate(o);
+      state.accounts=Array.isArray(o.accounts)?o.accounts:[];
+      state.redeemed=o.redeemed&&typeof o.redeemed==="object"?o.redeemed:{};
+      state.activeId=state.accounts.find(a=>a.id===o.activeId)?o.activeId:(state.accounts[0]?.id||null);
+      selected.clear();render();toast("已還原備份");
+    }catch(e){toast("還原失敗:檔案格式不正確");}};
+    r.readAsText(file);
+  }
+
   function openAllCodes(){
     const codes=state.creators.filter(c=>c.code&&c.code.trim()).map(c=>c.code.trim());
     const text=codes.join("\n");
@@ -427,6 +453,9 @@
   document.getElementById("renameBtn").onclick=openRenameAccount;
   document.getElementById("delAcctBtn").onclick=openDeleteAccount;
   document.getElementById("allBtn").onclick=openAllCodes;
+  document.getElementById("exportBtn").onclick=exportData;
+  document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+  document.getElementById("importFile").onchange=e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value="";};
   document.getElementById("search").oninput=e=>{query=e.target.value;renderGrid();};
   document.getElementById("filters").onclick=e=>{const b=e.target.closest("button");if(!b)return;filter=b.dataset.f;[...document.querySelectorAll("#filters button")].forEach(x=>x.classList.toggle("on",x===b));renderGrid();};
   document.getElementById("selClear").onclick=()=>{selected.clear();render();};
