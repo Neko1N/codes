@@ -378,9 +378,9 @@
     const grid=document.getElementById("grid");grid.innerHTML="";const acc=activeAccount();
     const map=acc?redeemedMap():{};const q=query.trim().toLowerCase();
     const list=state.creators.filter(c=>{
-      const isDone=!!map[c.id];
+      const isDone=!!map[c.id];const hasCode=!!(c.code&&c.code.trim());
       if(filter==="done"&&!isDone)return false;
-      if(filter==="todo"&&isDone)return false;
+      if(filter==="todo"&&(isDone||!hasCode))return false;  // 未兌換:隱藏尚未公佈的
       if(q&&!(c.name.toLowerCase().includes(q)||(c.code||"").toLowerCase().includes(q)))return false;
       return true;
     });
