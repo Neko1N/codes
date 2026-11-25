@@ -57,6 +57,14 @@
   .icon-btn{width:38px;height:38px;border-radius:12px;cursor:pointer;border:1.5px solid var(--line);background:#fbf5ec;color:var(--ink-soft);font-size:16px;transition:.18s;display:grid;place-items:center}
   .icon-btn:hover{border-color:var(--accent-soft);color:var(--accent-ink);background:#fff}
 
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .panel-head .panel-title{margin-bottom:0}
+  .wavetabs{display:inline-flex;background:#faf3ea;border:1.5px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .wavetab{border:none;background:transparent;padding:7px 15px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);transition:.15s;display:flex;align-items:center;gap:7px}
+  .wavetab:hover{color:var(--accent-ink)}
+  .wavetab.on{background:#fff;color:var(--accent-ink);box-shadow:var(--shadow-sm)}
+  .wavetab .wc{font-family:"Noto Sans TC";font-size:11px;font-weight:700;color:#fff;background:#cdbfa9;border-radius:999px;padding:1px 7px;min-width:16px;text-align:center}
+  .wavetab.on .wc{background:var(--accent)}
   .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
   .search{position:relative;flex:1;min-width:200px}
   .search input{width:100%;padding:12px 16px 12px 40px;border-radius:14px;border:1.5px solid var(--line);background:var(--paper);font-family:inherit;font-size:14.5px;color:var(--ink);box-shadow:var(--shadow-sm)}
@@ -91,7 +99,7 @@
   .code .ci{opacity:.5;flex-shrink:0;transition:.15s}
   .code:hover .ci{opacity:.9}
   .card.done .code{background:#f1f6ea;border-color:var(--done-line);color:var(--done-ink)}
-  .code.empty{cursor:default;color:var(--ink-soft);font-style:italic;letter-spacing:0;font-family:"Noto Sans TC";border-style:solid;border-color:var(--line);background:#f7f1e8}
+  .code.empty{cursor:default;color:var(--ink-soft);letter-spacing:0;font-family:"Noto Sans TC";border-style:solid;border-color:var(--line);background:#f7f1e8}
   .code.empty:hover{background:#f7f1e8;border-color:var(--line)}
 
   .toggle{width:100%;padding:10px;border-radius:11px;cursor:pointer;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-weight:700;font-size:14px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;gap:7px;transition:.18s}
@@ -167,7 +175,10 @@
   </header>
 
   <div class="panel">
-    <div class="panel-title"><span class="dot"></span>我的帳號</div>
+    <div class="panel-head">
+      <div class="panel-title"><span class="dot"></span>我的帳號</div>
+      <div id="waveBar"></div>
+    </div>
     <div class="accts" id="accts"></div>
     <div class="summary" id="summary" style="display:none">
       <div class="who">
@@ -223,14 +234,26 @@
 
   // ===== 序號清單(直接寫在這裡)=====
   // 一行一位:"名字=序號",序號未公佈就只寫名字。要增減直接改這個陣列。
-  const LIST = [
-    "Rui=RUIART","里歐=Leocyg","皮皮=17baby","小亮=XLIANG","獅子丸=SHISHI","小夜夜=yeyart",
-    "艾希=ELSMAP","瓜肉=GUAROU","小君=XJUN24","初吻=ARKISS","基德薯叔=unkidd","肯倫=kinlun",
-    "八毛=bamao8","光光實驗室=GUALAB","小六=MABUS6","阿嚕嚕=ARURU8","菇喜=GOODC8","魚丸=Yuwan8",
-    "小貓奈奈=NEKONA","二犬=Twodog","金金=Jinjin","鈴姆=Lingmu","傑克雪諾=JKSNOW","卡祖笛=TKAZOO",
-    "咪咪蛋=mmdart","taxicute=taxi88","可比_=kebi88","路過大學生=Passby","馬克巴巴=MKBABA",
-    "薯餅姐姐=HBROWN","阿偉-Wei=awei24","短腿娜娜=nana24","ivanl艾文=ivan24",
-    "愛文=PLYWEN","兔森森=BUNSEN"
+  // ===== 序號清單:每一「波」各自一份。要新增一波就在陣列再加一個 {...};未公佈的序號留空即可 =====
+  const WAVES = [
+    { id:"w1", name:"第一波", codes:[
+      "Rui=RUIART","里歐=Leocyg","皮皮=17baby","小亮=XLIANG","獅子丸=SHISHI","小夜夜=yeyart",
+      "艾希=ELSMAP","瓜肉=GUAROU","小君=XJUN24","初吻=ARKISS","基德薯叔=unkidd","肯倫=kinlun",
+      "八毛=bamao8","光光實驗室=GUALAB","小六=MABUS6","阿嚕嚕=ARURU8","菇喜=GOODC8","魚丸=Yuwan8",
+      "小貓奈奈=NEKONA","二犬=Twodog","金金=Jinjin","鈴姆=Lingmu","傑克雪諾=JKSNOW","卡祖笛=TKAZOO",
+      "咪咪蛋=mmdart","taxicute=taxi88","可比_=kebi88","路過大學生=Passby","馬克巴巴=MKBABA",
+      "薯餅姐姐=HBROWN","阿偉-Wei=awei24","短腿娜娜=nana24","ivanl艾文=ivan24",
+      "愛文=PLYWEN","兔森森=BUNSEN"
+    ]},
+    { id:"w2", name:"第二波", codes:[
+      "Rui=RUI8NZDGKJ","里歐=LEON4JBFNR","皮皮=","小亮=LIAF8U3EK5","獅子丸=SHIEK8GWMD","小夜夜=",
+      "艾希=","瓜肉=GUA77HKFQB","小君=JUN3NV8J6Q","初吻=KISF2J65JF","基德薯叔=KIDG99GK3C","肯倫=KENVXHGAF9",
+      "八毛=MAOS6RHYAZ","光光實驗室=LAB9GWJW22","小六=LIU5E3RT4S","阿嚕嚕=ARUYY82VKQ","菇喜=GDC4REBMBH","魚丸=",
+      "小貓奈奈=NEKUX232JY","二犬=","金金=","鈴姆=","傑克雪諾=SNWPV5APFM","卡祖笛=KAZPV7CZJQ",
+      "咪咪蛋=MIMQHZKP38","taxicute=TAXV4UFN7Y","可比_=","路過大學生=PAS2EAYNAW","馬克巴巴=",
+      "薯餅姐姐=HBRE8YNZY3","阿偉-Wei=WEIMHVV7RF","短腿娜娜=NANH2AQZ25","ivanl艾文=IVNNS5YYP7",
+      "愛文=","兔森森=BUN6DSZ9ZA"
+    ]}
   ];
 
   function parseRaw(raw){
@@ -239,9 +262,9 @@
       .map(s=>{const i=s.indexOf("=");return i<0?{name:s,code:""}:{name:s.slice(0,i).trim(),code:s.slice(i+1).trim()};})
       .filter(c=>c.name);
   }
-  const SOURCE = parseRaw(LIST.join("\n"));
+  function waveById(id){return WAVES.find(w=>w.id===id)||WAVES[0];}
   // 以「名字」作為穩定識別,序號改了、兌換紀錄照樣對得上
-  function buildCreators(){return SOURCE.map(c=>({id:c.name,name:c.name,code:c.code}));}
+  function creatorsOf(id){return parseRaw(waveById(id).codes.join("\n")).map(c=>({id:c.name,name:c.name,code:c.code}));}
 
   const selected = new Set();
   let filter = "all", query = "";
@@ -263,9 +286,19 @@
     }
     delete o.creators;
   }
+  // 舊版單波紀錄 redeemed[帳號][名字]=true → 歸入「第一波」
+  function migrateWaves(redeemed){
+    if(!redeemed||typeof redeemed!=="object")return;
+    Object.keys(redeemed).forEach(acct=>{
+      const m=redeemed[acct];if(!m||typeof m!=="object")return;
+      const hasWave=WAVES.some(w=>w.id in m);
+      const flat=Object.values(m).some(v=>typeof v==="boolean");
+      if(flat && !hasWave) redeemed[acct]={w1:Object.assign({},m)};
+    });
+  }
 
   function load(){
-    const s={accounts:[],activeId:null,redeemed:{}};
+    const s={accounts:[],activeId:null,activeWave:"w1",redeemed:{}};
     try{
       const raw=localStorage.getItem(LS_KEY);
       if(raw){
@@ -274,31 +307,55 @@
         s.accounts=Array.isArray(o.accounts)?o.accounts:[];
         s.activeId=o.activeId||null;
         s.redeemed=o.redeemed&&typeof o.redeemed==="object"?o.redeemed:{};
+        if(o.activeWave&&WAVES.some(w=>w.id===o.activeWave))s.activeWave=o.activeWave;
+        migrateWaves(s.redeemed);
       }
     }catch(e){}
-    s.creators=buildCreators();   // 清單一律以檔案為準
+    s.creators=creatorsOf(s.activeWave);
     if(!s.accounts.find(a=>a.id===s.activeId)) s.activeId=s.accounts[0]?.id||null;
     return s;
   }
   function save(){
-    try{localStorage.setItem(LS_KEY,JSON.stringify({accounts:state.accounts,activeId:state.activeId,redeemed:state.redeemed}));}
+    try{localStorage.setItem(LS_KEY,JSON.stringify({accounts:state.accounts,activeId:state.activeId,activeWave:state.activeWave,redeemed:state.redeemed}));}
     catch(e){toast("儲存失敗,瀏覽器空間可能已滿");}
   }
 
   function initials(name){if(!name)return"?";const n=name.trim();return /[一-鿿]/.test(n)?n.slice(-1):n.slice(0,2).toUpperCase();}
   function activeAccount(){return state.accounts.find(a=>a.id===state.activeId)||null;}
-  function redeemedMap(){if(!state.activeId)return{};state.redeemed[state.activeId]=state.redeemed[state.activeId]||{};return state.redeemed[state.activeId];}
-  function doneCount(acctId){const m=state.redeemed[acctId]||{};return state.creators.filter(c=>m[c.id]).length;}
+  function redeemedMap(){
+    if(!state.activeId)return{};
+    const acct=state.redeemed[state.activeId]=state.redeemed[state.activeId]||{};
+    acct[state.activeWave]=acct[state.activeWave]||{};
+    return acct[state.activeWave];
+  }
+  function doneCount(acctId,waveId){
+    const acct=state.redeemed[acctId]||{};const m=acct[waveId]||{};
+    return creatorsOf(waveId).filter(c=>m[c.id]).length;
+  }
   function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
-  function render(){renderAccounts();renderSummary();renderGrid();renderSelbar();save();}
+  function render(){renderWaves();renderAccounts();renderSummary();renderGrid();renderSelbar();save();}
+
+  function renderWaves(){
+    const bar=document.getElementById("waveBar");if(!bar)return;bar.innerHTML="";
+    const tabs=document.createElement("div");tabs.className="wavetabs";
+    const acc=activeAccount();
+    WAVES.forEach(w=>{
+      const b=document.createElement("button");
+      b.className="wavetab"+(w.id===state.activeWave?" on":"");
+      b.innerHTML=`${esc(w.name)}${acc?`<span class="wc">${doneCount(acc.id,w.id)}</span>`:""}`;
+      b.onclick=()=>{if(state.activeWave!==w.id){state.activeWave=w.id;state.creators=creatorsOf(w.id);selected.clear();render();}};
+      tabs.appendChild(b);
+    });
+    bar.appendChild(tabs);
+  }
 
   function renderAccounts(){
     const el=document.getElementById("accts");el.innerHTML="";
     state.accounts.forEach(a=>{
       const pill=document.createElement("div");
       pill.className="acct"+(a.id===state.activeId?" active":"");
-      pill.innerHTML=`<span class="ava">${esc(initials(a.name))}</span>${esc(a.name)} <span class="badge">${doneCount(a.id)}</span>`;
+      pill.innerHTML=`<span class="ava">${esc(initials(a.name))}</span>${esc(a.name)} <span class="badge">${doneCount(a.id,state.activeWave)}</span>`;
       pill.onclick=()=>{state.activeId=a.id;render();};
       el.appendChild(pill);
     });
@@ -313,7 +370,7 @@
     box.style.display="flex";
     document.getElementById("sumAva").textContent=initials(acc.name);
     document.getElementById("sumName").textContent=acc.name;
-    const total=state.creators.length,done=doneCount(acc.id);
+    const total=state.creators.length,done=doneCount(acc.id,state.activeWave);
     document.getElementById("sumCount").textContent=`${done} / ${total}`;
     document.getElementById("sumBar").style.width=(total?Math.round(done/total*100):0)+"%";
   }
@@ -417,7 +474,7 @@
   }
 
   function exportData(){
-    const data={accounts:state.accounts,activeId:state.activeId,redeemed:state.redeemed};
+    const data={accounts:state.accounts,activeId:state.activeId,activeWave:state.activeWave,redeemed:state.redeemed};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob);const a=document.createElement("a");
     const d=new Date();const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
@@ -430,6 +487,9 @@
       migrate(o);
       state.accounts=Array.isArray(o.accounts)?o.accounts:[];
       state.redeemed=o.redeemed&&typeof o.redeemed==="object"?o.redeemed:{};
+      migrateWaves(state.redeemed);
+      if(o.activeWave&&WAVES.some(w=>w.id===o.activeWave))state.activeWave=o.activeWave;
+      state.creators=creatorsOf(state.activeWave);
       state.activeId=state.accounts.find(a=>a.id===o.activeId)?o.activeId:(state.accounts[0]?.id||null);
       selected.clear();render();toast("已還原備份");
     }catch(e){toast("還原失敗:檔案格式不正確");}};
