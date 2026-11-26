@@ -220,9 +220,8 @@
   "use strict";
   const LS_KEY = "serialTracker.v1";
 
-  // ===== 序號清單(直接寫在這裡)=====
-  // 一行一位:"名字=序號",序號未公佈就只寫名字。要增減直接改這個陣列。
-  // ===== 序號清單:每一「波」各自一份。要新增一波就在陣列再加一個 {...};未公佈的序號留空即可 =====
+  // ===== 序號清單=====
+
   const WAVES = [
     { id:"w1", name:"第一波", codes:[
       "Rui=RUIART","里歐=Leocyg","皮皮=17baby","小亮=XLIANG","獅子丸=SHISHI","小夜夜=yeyart",
@@ -234,8 +233,8 @@
       "愛文=PLYWEN","兔森森=BUNSEN"
     ]},
     { id:"w2", name:"第二波", codes:[
-      "Rui=RUI8NZDGKJ","里歐=LEON4JBFNR","皮皮=","小亮=LIAF8U3EK5","獅子丸=SHIEK8GWMD","小夜夜=",
-      "艾希=","瓜肉=GUA77HKFQB","小君=JUN3NV8J6Q","初吻=KISF2J65JF","基德薯叔=KIDG99GK3C","肯倫=KENVXHGAF9",
+      "Rui=RUI8NZDGKJ","里歐=LEON4JBFNR","皮皮=PIPRPWM6R6","小亮=LIAF8U3EK5","獅子丸=SHIEK8GWMD","小夜夜=",
+      "艾希=AIXK42K5B5","瓜肉=GUA77HKFQB","小君=JUN3NV8J6Q","初吻=KISF2J65JF","基德薯叔=KIDG99GK3C","肯倫=KENVXHGAF9",
       "八毛=MAOS6RHYAZ","光光實驗室=LAB9GWJW22","小六=LIU5E3RT4S","阿嚕嚕=ARUYY82VKQ","菇喜=GDC4REBMBH","魚丸=",
       "小貓奈奈=NEKUX232JY","二犬=","金金=JINEPHW4YB","鈴姆=LNGBS9PARP","傑克雪諾=SNWPV5APFM","卡祖笛=KAZPV7CZJQ",
       "咪咪蛋=MIMQHZKP38","taxicute=TAXV4UFN7Y","可比_=","路過大學生=PAS2EAYNAW","馬克巴巴=",
@@ -251,7 +250,6 @@
       .filter(c=>c.name);
   }
   function waveById(id){return WAVES.find(w=>w.id===id)||WAVES[0];}
-  // 以「名字」作為穩定識別,序號改了、兌換紀錄照樣對得上
   function creatorsOf(id){return parseRaw(waveById(id).codes.join("\n")).map(c=>({id:c.name,name:c.name,code:c.code}));}
 
   let copiedId=null;  // 目前複製(高亮)的那一條
