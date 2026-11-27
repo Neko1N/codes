@@ -372,7 +372,7 @@
     });
     if(!acc){
       const nb=document.createElement("div");nb.className="notice";
-      nb.innerHTML=`先在上方<b>新增帳號</b>,就能勾選記錄這個帳號兌換了哪些序號。`;
+      nb.innerHTML=`先在上方<b>新增帳號</b>,即可開始紀錄。`;
       grid.appendChild(nb);
     }
     if(list.length===0){const e=document.createElement("div");e.className="empty-state";e.style.gridColumn="1/-1";e.innerHTML=`<div class="big">🔍</div><div>沒有符合條件的序號。</div>`;grid.appendChild(e);return;}
@@ -422,8 +422,8 @@
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 
   function openAddAccount(){
-    modal.innerHTML=`<h3>新增帳號</h3><p class="hint">幫這個遊戲帳號取個名字,方便辨識。</p>
-      <div class="field"><label>帳號名稱</label><input id="mInput" placeholder="例如:主帳、小帳1、實況帳…" maxlength="24"></div>
+    modal.innerHTML=`<h3>新增帳號</h3><p class="hint">取個名唄</p>
+      <div class="field"><label>帳號名稱</label><input id="mInput" placeholder="例如:本帳、二本、突襲帳…" maxlength="24"></div>
       <div class="modal-actions"><button class="btn-cancel" id="mCancel">取消</button><button class="btn-ok" id="mOk">新增</button></div>`;
     overlay.classList.add("show");const inp=document.getElementById("mInput");inp.focus();
     document.getElementById("mCancel").onclick=closeModal;
@@ -442,7 +442,7 @@
   }
   function openDeleteAccount(){
     const acc=activeAccount();if(!acc)return;
-    modal.innerHTML=`<h3>刪除帳號</h3><p class="hint">確定要刪除「${esc(acc.name)}」嗎?這個帳號的兌換紀錄會一併移除,無法復原。</p>
+    modal.innerHTML=`<h3>刪除帳號</h3><p class="hint">確定要刪除「${esc(acc.name)}」嗎?此帳號的兌換紀錄會一併移除，無法復原。</p>
       <div class="modal-actions"><button class="btn-cancel" id="mCancel">取消</button><button class="btn-ok" id="mDel" style="background:linear-gradient(180deg,#c06258,var(--danger))">刪除</button></div>`;
     overlay.classList.add("show");
     document.getElementById("mCancel").onclick=closeModal;
@@ -477,7 +477,7 @@
     const text=codes.join("\n");
     modal.innerHTML=`
       <div class="mg-head"><h3>全部序號</h3><span class="hint" style="margin:0">共 ${codes.length} 組</span></div>
-      <p class="hint" style="margin-top:-6px">一行一組,只有序號。可直接全選複製,或按下方按鈕一次複製全部。</p>
+      <p class="hint" style="margin-top:-6px">可直接全選複製，或按下方按鈕一次複製全部。</p>
       <textarea class="allbox" id="allBox" readonly>${esc(text)}</textarea>
       <div class="modal-actions"><button class="btn-cancel" id="mCancel">關閉</button><button class="btn-ok" id="mOk">複製全部</button></div>`;
     overlay.classList.add("show");
