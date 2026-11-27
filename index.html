@@ -216,36 +216,36 @@
 <div class="toast" id="toast"></div>
 
 <script>
-(function(){
-  "use strict";
-  const LS_KEY = "serialTracker.v1";
+	(function(){
+	"use strict";
+	const LS_KEY = "serialTracker.v1";
 
-  // ===== 序號清單=====
+	// ===== 序號清單=====
 
-  const WAVES = [
-    { id:"w1", name:"第一波", codes:[
-      "Rui=RUIART","里歐=Leocyg","皮皮=17baby","小亮=XLIANG","獅子丸=SHISHI","小夜夜=yeyart",
-      "艾希=ELSMAP","瓜肉=GUAROU","小君=XJUN24","初吻=ARKISS","基德薯叔=unkidd","肯倫=kinlun",
-      "八毛=bamao8","光光實驗室=GUALAB","小六=MABUS6","阿嚕嚕=ARURU8","菇喜=GOODC8","魚丸=Yuwan8",
-      "小貓奈奈=NEKONA","二犬=Twodog","金金=Jinjin","鈴姆=Lingmu","傑克雪諾=JKSNOW","卡祖笛=TKAZOO",
-      "咪咪蛋=mmdart","taxicute=taxi88","可比_=kebi88","路過大學生=Passby","馬克巴巴=MKBABA",
-      "薯餅姐姐=HBROWN","阿偉-Wei=awei24","短腿娜娜=nana24","ivanl艾文=ivan24",
-      "愛文=PLYWEN","兔森森=BUNSEN"
-    ]},
-    { id:"w2", name:"第二波", codes:[
-      "Rui=RUI8NZDGKJ","里歐=LEON4JBFNR","皮皮=PIPRPWM6R6","小亮=LIAF8U3EK5","獅子丸=SHIEK8GWMD","小夜夜=",
-      "艾希=AIXK42K5B5","瓜肉=GUA77HKFQB","小君=JUN3NV8J6Q","初吻=KISF2J65JF","基德薯叔=KIDG99GK3C","肯倫=KENVXHGAF9",
-      "八毛=MAOS6RHYAZ","光光實驗室=LAB9GWJW22","小六=LIU5E3RT4S","阿嚕嚕=ARUYY82VKQ","菇喜=GDC4REBMBH","魚丸=",
-      "小貓奈奈=NEKUX232JY","二犬=","金金=JINEPHW4YB","鈴姆=LNGBS9PARP","傑克雪諾=SNWPV5APFM","卡祖笛=KAZPV7CZJQ",
-      "咪咪蛋=MIMQHZKP38","taxicute=TAXV4UFN7Y","可比_=","路過大學生=PAS2EAYNAW","馬克巴巴=",
-      "薯餅姐姐=HBRE8YNZY3","阿偉-Wei=WEIMHVV7RF","短腿娜娜=NANH2AQZ25","ivanl艾文=IVNNS5YYP7",
-      "愛文=","兔森森=BUN6DSZ9ZA"
-    ]}
-  ];
+	const WAVES = [
+	{ id:"w1", name:"第一波", codes:[
+	"Rui=RUIART","里歐=Leocyg","皮皮=17baby","小亮=XLIANG","獅子丸=SHISHI","小夜夜=yeyart",
+	"艾希=ELSMAP","瓜肉=GUAROU","小君=XJUN24","初吻=ARKISS","基德薯叔=unkidd","肯倫=kinlun",
+	"八毛=bamao8","光光實驗室=GUALAB","小六=MABUS6","阿嚕嚕=ARURU8","菇喜=GOODC8","魚丸=Yuwan8",
+	"小貓奈奈=NEKONA","二犬=Twodog","金金=Jinjin","鈴姆=Lingmu","傑克雪諾=JKSNOW","卡祖笛=TKAZOO",
+	"咪咪蛋=mmdart","taxicute=taxi88","可比_=kebi88","路過大學生=Passby","馬克巴巴=MKBABA",
+	"薯餅姐姐=HBROWN","阿偉-Wei=awei24","短腿娜娜=nana24","ivanl艾文=ivan24",
+	"愛文=PLYWEN","兔森森=BUNSEN"
+	]},
+	{ id:"w2", name:"第二波", codes:[
+	"Rui=RUI8NZDGKJ","里歐=LEON4JBFNR","皮皮=PIPRPWM6R6","小亮=LIAF8U3EK5","獅子丸=SHIEK8GWMD","小夜夜=",
+	"艾希=AIXK42K5B5","瓜肉=GUA77HKFQB","小君=JUN3NV8J6Q","初吻=KISF2J65JF","基德薯叔=KIDG99GK3C","肯倫=KENVXHGAF9",
+	"八毛=MAOS6RHYAZ","光光實驗室=LAB9GWJW22","小六=LIU5E3RT4S","阿嚕嚕=ARUYY82VKQ","菇喜=GDC4REBMBH","魚丸=",
+	"小貓奈奈=NEKUX232JY","二犬=DOGAG9VZK6","金金=JINEPHW4YB","鈴姆=LNGBS9PARP","傑克雪諾=SNWPV5APFM","卡祖笛=KAZPV7CZJQ",
+	"咪咪蛋=MIMQHZKP38","taxicute=TAXV4UFN7Y","可比_=","路過大學生=PAS2EAYNAW","馬克巴巴=",
+	"薯餅姐姐=HBRE8YNZY3","阿偉-Wei=WEIMHVV7RF","短腿娜娜=NANH2AQZ25","ivanl艾文=IVNNS5YYP7",
+	"愛文=","兔森森=BUN6DSZ9ZA"
+	]}
+	];
 
-  function parseRaw(raw){
-    return String(raw||"").split(/\r?\n/).map(s=>s.trim())
-      .filter(s=>s && !s.startsWith("//"))
+	function parseRaw(raw){
+	return String(raw||"").split(/\r?\n/).map(s=>s.trim())
+	.filter(s=>s && !s.startsWith("//"))
       .map(s=>{const i=s.indexOf("=");return i<0?{name:s,code:""}:{name:s.slice(0,i).trim(),code:s.slice(i+1).trim()};})
       .filter(c=>c.name);
   }
